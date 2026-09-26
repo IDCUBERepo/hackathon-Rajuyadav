@@ -1,0 +1,60 @@
+# Tambola Together on the Hackathon2026-aks cluster.
+# Needs the "acr-pull" docker-registry secret in the namespace (created by hand, not stored here).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tambola
+  namespace: hackathon-raju
+  labels: { app: tambola }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: tambola }
+  template:
+    metadata:
+      labels: { app: tambola }
+    spec:
+      imagePullSecrets:
+        - name: acr-pull
+      containers:
+        - name: web
+          image: hackathon2026idcube.azurecr.io/tambola-together:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+          livenessProbe:
+            httpGet: { path: /, port: 80 }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tambola
+  namespace: hackathon-raju
+spec:
+  selector: { app: tambola }
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tambola
+  namespace: hackathon-raju
+spec:
+  ingressClassName: webapprouting.kubernetes.azure.com
+  rules:
+    - host: tambola-raju.4.224.233.161.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tambola
+                port: { number: 80 }
