@@ -164,6 +164,22 @@ test('TV: banner and winners board update after each win, and persist after refr
   await expect(tv.locator('.tv-winners li')).toHaveCount(6);
 });
 
+test('TV: claims can be checked from TV mode, and Escape only closes the dialog', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await seed(page, {}, '/caller/tv');
+  await claim(page, A, 'Priya');
+  await expect(page.getByRole('dialog').locator('.result-message')).toContainText('We have a winner for Top Line');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page).toHaveURL(/#\/caller\/tv$/);
+  await expect(page.locator('.tv-winners li', { hasText: 'Top Line' })).toContainText('Won by Priya (100 pts)');
+  // The claim window is still open for shared winners, and can be used or finished from TV mode.
+  const open = page.locator('.tv-claims');
+  await expect(open).toContainText('Claims are still open for Top Line');
+  await open.getByRole('button', { name: 'Check another claim' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+});
+
 test('TV: a long winners list scrolls inside the panel and never breaks the layout', async ({ page }) => {
   const many = ['earlyFive', 'topLine', 'middleLine', 'bottomLine', 'fourCorners'].flatMap((pattern) =>
     Array.from({ length: 12 }, (_, i) => ({

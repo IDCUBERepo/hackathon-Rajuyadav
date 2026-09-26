@@ -435,6 +435,8 @@ body.tv-mode .site-header { display: none; }
 .tv .board-cell { font-size: clamp(0.9rem, 1.9vw, 2.2rem); }
 .tv .section-label { font-size: clamp(0.9rem, 1.4vw, 1.5rem); }
 .tv-controls { grid-area: controls; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.tv-claims { flex-basis: 100%; display: grid; gap: 0.5rem; }
+.tv-claims[hidden] { display: none; }
 
 /* ---------- Tickets ---------- */
 

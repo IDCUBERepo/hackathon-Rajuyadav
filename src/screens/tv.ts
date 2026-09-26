@@ -1,7 +1,8 @@
 import { getGame, isAutoRunning, pauseAuto, startAuto, subscribe } from '../caller/session';
-import { canDraw } from '../core/game';
-import { t } from '../i18n';
+import { canDraw, openClaimWindows } from '../core/game';
+import { strings, t } from '../i18n';
 import { boardPart, currentNumberPart, lastFivePart, prizeTrackerPart } from '../ui/callerParts';
+import { finishClaimsFor, finishLabel, openClaimDialog } from '../ui/claimDialog';
 import { fullscreenQrButton, qrImage } from '../ui/qrJoin';
 import { showWinnerBanner } from '../ui/winnerBanner';
 import { h, icon, navigate, replaceChildren, srOnly } from '../ui/dom';
@@ -38,6 +39,30 @@ export const tvScreen: Screen = (main) => {
     onclick: () => (isAutoRunning() ? pauseAuto() : startAuto()),
   });
 
+  const claimBtn = h('button', { type: 'button', class: 'btn btn-accent', onclick: () => openClaimDialog() }, icon('🔍'), t('checkClaim'));
+  // Open claim windows (shared winners) must be finishable here too, or drawing stays blocked in TV mode.
+  const claimsOpen = h('div', { class: 'tv-claims', 'aria-live': 'polite' });
+  const updateClaimsOpen = (g: NonNullable<ReturnType<typeof getGame>>) => {
+    const number = g.called[g.called.length - 1];
+    replaceChildren(
+      claimsOpen,
+      openClaimWindows(g).map((p) =>
+        h(
+          'div',
+          { class: 'claims-open' },
+          h('p', { class: 'claims-open-text' }, icon('📣'), t('claimsOpenBanner', { pattern: strings.patterns[p], number })),
+          h(
+            'div',
+            { class: 'button-row' },
+            h('button', { type: 'button', class: 'btn btn-accent', onclick: () => openClaimDialog(p) }, icon('↻'), t('claimAnother')),
+            h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => void finishClaimsFor(p) }, icon('✓'), finishLabel()),
+          ),
+        ),
+      ),
+    );
+    claimsOpen.hidden = claimsOpen.childElementCount === 0;
+  };
+
   const exit = () => {
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => undefined);
     navigate('#/caller');
@@ -65,8 +90,10 @@ export const tvScreen: Screen = (main) => {
       h(
         'div',
         { class: 'tv-controls' },
+        claimsOpen,
         callBtn,
         autoBtn,
+        claimBtn,
         fullscreenQrButton(game.gameCode, 'btn btn-secondary'),
         h('button', { type: 'button', class: 'btn btn-quiet', onclick: exit }, icon('✕'), t('exitTv')),
       ),
@@ -83,6 +110,7 @@ export const tvScreen: Screen = (main) => {
     lastFive.update(g);
     board.update(g);
     winners.update(g);
+    updateClaimsOpen(g);
     callBtn.disabled = !canDraw(g);
     autoBtn.disabled = !canDraw(g);
     replaceChildren(autoBtn, icon(isAutoRunning() ? '⏸' : '▶'), isAutoRunning() ? t('autoPause') : t('autoStart'));
@@ -101,7 +129,8 @@ export const tvScreen: Screen = (main) => {
   const onKey = drawShortcut(callNext);
   const onEscape = (e: KeyboardEvent) => {
     // Browsers leave fullscreen on Escape themselves; we also leave TV mode.
-    if (e.key === 'Escape') exit();
+    // Escape inside an open dialog (such as a claim) only closes that dialog.
+    if (e.key === 'Escape' && !document.querySelector('dialog[open]')) exit();
   };
   document.addEventListener('keydown', onKey);
   document.addEventListener('keydown', onEscape);
