@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-text="0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Play Tambola (Housie) together in the same room. Draw and announce numbers, get tickets, check claims. Works offline." />
+    <meta name="theme-color" content="#b33f00" />
+    <title>Tambola Together</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <script>
+      // Apply saved theme and text size before first paint to avoid a flash.
+      try {
+        var p = JSON.parse(localStorage.getItem('tt:prefs') || 'null');
+        if (p && p.theme && p.theme !== 'system') document.documentElement.setAttribute('data-theme', p.theme);
+        if (p && (p.textSize === 1 || p.textSize === 2)) document.documentElement.setAttribute('data-text', String(p.textSize));
+        if (p && p.inclusive === true) document.documentElement.setAttribute('data-inclusive', 'true');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="live-polite" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div id="live-assertive" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+    <noscript><p style="padding:1rem;font-size:1.25rem">Tambola Together needs JavaScript to run.</p></noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

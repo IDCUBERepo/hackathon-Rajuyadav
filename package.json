@@ -1,0 +1,31 @@
+{
+  "name": "tambola-together",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An accessible, offline-first web app for playing Tambola (Housie) in person.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "e2e": "playwright test --project=chromium",
+    "icons": "node scripts/make-icons.mjs",
+    "e2e:all": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "@types/qrcode": "^1.5.6",
+    "jsqr": "^1.4.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
