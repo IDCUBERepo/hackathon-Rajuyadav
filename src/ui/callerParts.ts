@@ -49,14 +49,14 @@ export function currentNumberPart(): Part & { pop: () => void } {
   };
 }
 
-/** The previous numbers (most recent first), excluding the current one. */
+/** The latest five numbers called (most recent first), including the current one. */
 export function lastFivePart(): Part {
   const list = h('ol', { class: 'last-five' });
   const el = h('section', { class: 'last-five-wrap' }, h('h2', { class: 'section-label' }, t('lastFive')), list);
   return {
     el,
     update(game) {
-      const recent = game.called.slice(-6, -1).reverse();
+      const recent = game.called.slice(-5).reverse();
       if (recent.length === 0) {
         replaceChildren(list, h('li', { class: 'last-five-empty' }, t('noneYet')));
         return;

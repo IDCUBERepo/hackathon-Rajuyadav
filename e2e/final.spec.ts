@@ -430,7 +430,7 @@ test('X6 a full 90-number game on auto-draw at the fastest interval: no errors, 
   expect([...order].sort((a, b) => a - b)).toEqual(Array.from({ length: 90 }, (_, i) => i + 1));
   await consistency(page);
   await expect(page.locator('.current-number')).toHaveText(String(order[89]));
-  expect((await page.locator('.last-five li').allInnerTexts()).map(Number)).toEqual(order.slice(-6, -1).reverse());
+  expect((await page.locator('.last-five li').allInnerTexts()).map(Number)).toEqual(order.slice(-5).reverse());
   await expect(page.getByRole('button', { name: 'Call Next Number' })).toBeDisabled();
   await expect(page.getByText('All 90 numbers have been called.')).toBeVisible();
   await expect(page.locator('.prize-earlyFive, .prize').filter({ hasText: 'Early Five' })).toContainText('Won by Meera');
